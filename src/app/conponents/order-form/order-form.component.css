@@ -6,6 +6,13 @@
   margin-bottom: 20px;
 }
 
+#container {
+  width: 60%; /* largura desejada */
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
 label {
   display: block;
   margin-bottom: 5px;
@@ -34,4 +41,26 @@ button {
 
 button:hover {
   background-color: #45a049;
+}
+
+
+.styled-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #ddd;
+}
+
+.styled-table th, .styled-table td {
+  padding: 8px;
+  border: 1px solid #ddd;
+}
+
+.styled-table th {
+  background-color: #f2f2f2;
+  font-weight: bold;
+  text-align: left;
+}
+
+.styled-table tbody tr:nth-child(even) {
+  background-color: #f2f2f2;
 }

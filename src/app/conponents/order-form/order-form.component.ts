@@ -1,5 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { serviceBackend } from './service-backend';
+import { Comprador } from './Comprador';
+
 
 @Component({
   selector: 'app-order-form',
@@ -14,6 +16,8 @@ export class OrderFormComponent {
   taxaEntrega: number = 0;
   desconto: number = 0;
   customerList: any[] = [];
+  resultados: any[] = [];
+  comprador: any[] = [];
 
   adicionarNomesConsumidores() {
     this.nomesConsumidores = [];
@@ -31,10 +35,6 @@ export class OrderFormComponent {
       quantidade: '',
       comprador: this.nomesConsumidores.map(consumidor => consumidor.nome).join(', ')
     });
-  }
-
-  enviar() {
-    // Lógica para enviar os dados do formulário
   }
 
   calcularTotalItem(item: any): number {
@@ -76,40 +76,56 @@ export class OrderFormComponent {
   constructor(private service: serviceBackend) { }
 
   enviarDadosParaBackend() {
-    const dados = { /* Aqui você coloca os dados que deseja enviar para o backend */ };
+    const dados = this.estruturarJSON();
+    console.log(dados);
     this.service.enviarDadosParaBackend(dados).subscribe(response => {
       console.log('Resposta do backend:', response);
+
+      if (response && response.customerEntityList && Array.isArray(response.customerEntityList)) {
+        this.resultados = response.customerEntityList.map((customerEntity: any) => ({
+          quantidadeCompradores: response.customerEntityList.length,
+          totalCompra: response.totalPurchase,
+          desconto: response.discount,
+          taxaEntrega: response.deliveryFee,
+          totalFinal: response.finalValue,
+          compradores: [
+            {
+              numero: 1,
+              itens: customerEntity.itemList.map((item: any) => item.name).join(', '),
+              total: customerEntity.totalPayable,
+              porcentagem: customerEntity.percentage
+            }
+          ]
+        }));
+      } else {
+        console.error("Erro ao buscar dados no backend.");
+      }
+
     });
   }
 
-  gerarJson() {
-    const json = {
-      customerList: [],
-      discount: 0,
-      deliveryFee: 0
-    };
-
-    for (let i = 0; i < this.numConsumidores; i++) {
+  estruturarJSON(): any {
+    const customerList = [];
+    for (const item of this.itens) {
       const customer = {
-        name: this.nomesConsumidores[i]?.nome || `Consumidor ${i + 1}`,
-        itemList: [],
-        percentage: "0",
-        totalPayable: "0"
-      };
-      for (const item of this.itens) {
-        if (item.comprador === this.nomesConsumidores[i]?.nome) {
-          customer.itemList.push({
+        name: item.comprador,
+        itemList: [
+          {
             name: item.item,
-            value: (item.quantidade * 10).toFixed(1)
-          });
-        }
-      }
-      json.customerList.push(customer);
+            value: this.calcularTotalItem(item).toFixed(2)
+          }
+        ],
+        percentage: '0',
+        totalPayable: '0'
+      };
+      customerList.push(customer);
     }
-
-    json.discount = this.desconto;
-    json.deliveryFee = this.taxaEntrega;
-
-    console.log('JSON gerado:', json);
+    const json = {
+      customerList: customerList,
+      discount: this.desconto.toString(),
+      deliveryFee: this.taxaEntrega.toString()
+    };
+    return json;
   }
+
 }

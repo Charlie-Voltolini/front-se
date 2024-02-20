@@ -1,5 +1,9 @@
+<div style="display: flex;">
 
-<div id="consumidores">
+
+
+  <div id="container" style="width: 60%; padding: 20px; border: 1px solid #ccc; border-radius: 5px;">
+    <div id="consumidores">
   <h2>Consumidores</h2>
   <label for="numConsumidores">Quantidade de compradores:</label>
   <input type="number" id="numConsumidores" [(ngModel)]="numConsumidores" min="1" max="10" (change)="numConsumidores > 0 && atualizarNomesConsumidores()">
@@ -18,7 +22,10 @@
         <option value="item3">Sanduiche</option>
       </select>
       <input type="number" [(ngModel)]="itens[i].quantidade" placeholder="Quantidade">
-      <input type="text" [(ngModel)]="itens[i].comprador" placeholder="Comprador">
+      <!-- <input type="text" [(ngModel)]="itens[i].comprador" placeholder="Comprador"> -->
+      <select [(ngModel)]="itens[i].comprador">
+        <option *ngFor="let consumidor of nomesConsumidores" [ngValue]="consumidor.nome">{{ consumidor.nome }}</option>
+      </select>
     </div>
   </div>
   <button (click)="adicionarItem()">Adicionar Item</button>
@@ -26,7 +33,7 @@
 
 <div id="tabela">
   <h2>Tabela de Itens</h2>
-  <table>
+  <table class="styled-table">
     <thead>
       <tr>
         <th>Item</th>
@@ -41,13 +48,12 @@
         <td>{{ item.quantidade }}</td>
         <td>R$ {{ calcularTotalItem(item) }}</td>
         <td>{{ item.comprador }}</td>
-        <ng-container *ngIf="last">
-          <td colspan="2">Total da compra</td>
-          <td>R$ {{ calcularTotalCompra() }}</td>
-        </ng-container>
       </tr>
     </tbody>
   </table>
+  <div>
+    <span>Total da compra: R$ {{ calcularTotalCompra() }}</span>
+  </div>
 </div>
 
 <div id="taxa-desconto">
@@ -64,5 +70,28 @@
 
 <div id="enviar">
   <button (click)="limpar()">Limpar</button>
-  <button (click)="enviar()">Enviar</button>
+  <button (click)="enviarDadosParaBackend()">Enviar</button>
+</div>
+</div>
+<div id="resultados" style="width: 40%; padding: 20px;">
+  <h2>Resultados</h2>
+  <div *ngFor="let resultado of resultados">
+    <div>
+      <p>Quantidade de compradores: {{ resultado.quantidadeCompradores }}</p>
+      <p *ngFor="let comprador of resultado.compradores">
+        Comprador {{ comprador.numero }}: {{ comprador.itens.join(', ') }};
+      </p>
+      <p>Total da compra: {{ resultado.totalCompra }}</p>
+      <p>Desconto aplicado: {{ resultado.desconto }}</p>
+      <p>Adição de taxa de entrega: {{ resultado.taxaEntrega }}</p>
+      <p>Total final: {{ resultado.totalFinal }}</p>
+      <p *ngFor="let comprador of resultado.compradores">
+        Total comprador {{ comprador.numero }}: {{ comprador.total }};
+      </p>
+      <p *ngFor="let comprador of resultado.compradores">
+        Porcentagem comprador {{ comprador.numero }}: {{ comprador.porcentagem }}%;
+      </p>
+    </div>
+  </div>
+</div>
 </div>
